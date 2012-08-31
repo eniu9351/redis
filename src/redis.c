@@ -192,6 +192,9 @@ struct redisCommand readonlyCommandTable[] = {
     {"unwatch",unwatchCommand,1,0,NULL,0,0,0},
     {"object",objectCommand,-2,0,NULL,0,0,0},
     {"client",clientCommand,-2,0,NULL,0,0,0},
+		//mmm
+{"delandlog", sstoreDelandlogCommand, 2, 0, NULL, 1, 1, 1},
+		//mmm end
     {"slowlog",slowlogCommand,-2,0,NULL,0,0,0}
 };
 
@@ -1751,10 +1754,31 @@ void usage() {
 
 void memtest(size_t megabytes, int passes);
 
+//mmm
+void sstore_mongo_init()
+{
+				int status;
+				mongo* conn = server.mongoc;
+				status = mongo_connect( conn, "192.168.8.16", 27017 );
+
+				if( status != MONGO_OK ) {
+								switch ( conn->err ) {
+												case MONGO_CONN_SUCCESS:    printf( "[mongoinit]connection succeeded\n" ); break;
+												case MONGO_CONN_NO_SOCKET:  printf( "[mongoinit]no socket\n" ); return 1;
+												case MONGO_CONN_FAIL:       printf( "[mongoinit]connection failed\n" ); return 1;
+												case MONGO_CONN_NOT_MASTER: printf( "[mongoinit]not master\n" ); return 1;
+								}
+				}
+}
+
+
 int main(int argc, char **argv) {
     time_t start;
 
     initServerConfig();
+
+		sstore_mongo_init();
+
     if (argc >= 2 && strcmp(argv[1], "--test-memory") == 0) {
         if (argc == 3) {
             memtest(atoi(argv[2]),50);

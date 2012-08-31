@@ -31,6 +31,10 @@
 #include "version.h"
 #include "util.h"
 
+//mmm
+#include <mongo.h>
+
+
 /* Error codes */
 #define REDIS_OK                0
 #define REDIS_ERR               -1
@@ -545,6 +549,8 @@ struct redisServer {
     char *assert_file;
     int assert_line;
     int bug_report_start; /* True if bug report header already logged. */
+		//mmm:
+		mongo mongoc[1];	
 };
 
 typedef struct pubsubPattern {
@@ -1071,6 +1077,9 @@ void watchCommand(redisClient *c);
 void unwatchCommand(redisClient *c);
 void objectCommand(redisClient *c);
 void clientCommand(redisClient *c);
+//mmm
+void sstoreDelandlogCommand(redisClient *c);
+
 
 #if defined(__GNUC__)
 void *calloc(size_t count, size_t size) __attribute__ ((deprecated));
