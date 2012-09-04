@@ -450,12 +450,23 @@ void genericHgetallCommand(redisClient *c, int flags) {
 
         if (flags & REDIS_HASH_KEY) {
             encoding = hashTypeCurrent(hi,REDIS_HASH_KEY,&obj,&v,&vlen);
-            if (encoding == REDIS_ENCODING_HT)
-                addReplyBulk(c,obj);
-            else
+				printf("encoding of k=%d\n",encoding);
+
+
+				if (encoding == REDIS_ENCODING_HT)	{
+				printf("if: k=%s, encoding of k=%d, klen=%d\n",v, encoding, vlen);
+				addReplyBulk(c,obj);
+					}
+            else	{
+					printf("else: k=%s, encoding of k=%d, klen=%d\n",v, encoding, vlen);
                 addReplyBulkCBuffer(c,v,vlen);
+            	}
+
+			
+            	
             count++;
         }
+				/*
         if (flags & REDIS_HASH_VALUE) {
             encoding = hashTypeCurrent(hi,REDIS_HASH_VALUE,&obj,&v,&vlen);
             if (encoding == REDIS_ENCODING_HT)
@@ -464,6 +475,7 @@ void genericHgetallCommand(redisClient *c, int flags) {
                 addReplyBulkCBuffer(c,v,vlen);
             count++;
         }
+        */
     }
     hashTypeReleaseIterator(hi);
     setDeferredMultiBulkLength(c,replylen,count);

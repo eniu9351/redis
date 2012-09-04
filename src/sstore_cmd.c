@@ -23,7 +23,13 @@ void sstoreDelandlogCommand(redisClient *c)
 				bson b[1];
 				char* vcopy;
 
-				printf("sstore 0\n");
+
+
+				//printf("sstore 0, key=%s\n", c->argv[1]->ptr);
+
+				if(1==2)	{
+					return;
+					}
 				//1. get value
 				if ((o = lookupKeyReadOrReply(c,c->argv[1],shared.emptymultibulk)) == NULL
 												|| checkType(c,o,REDIS_HASH)) {
@@ -31,13 +37,13 @@ void sstoreDelandlogCommand(redisClient *c)
 								return;
 				}
 
-				printf("sstore 1\n");
+				//printf("sstore 1\n");
 				//	addReplyLongLong(c,deleted);
 
 				//2. log
 				bson_init( b );
 				bson_append_new_oid( b , "_id" );
-				printf("sstore 2\n");
+				//printf("sstore 2\n");
 
 				//				replylen = addDeferredMultiBulkLength(c);
 				hashTypeIterator* hi = hashTypeInitIterator(o);
@@ -49,6 +55,8 @@ void sstoreDelandlogCommand(redisClient *c)
 								unsigned int klen = 0;
 								int encoding;
 
+								//printf("sstore iterate start\n");
+
 								//								if (flags & REDIS_HASH_KEY) {
 								encoding = hashTypeCurrent(hi,REDIS_HASH_KEY,&obj,&k,&klen);
 								//if (encoding == REDIS_ENCODING_HT)
@@ -57,20 +65,55 @@ void sstoreDelandlogCommand(redisClient *c)
 								//					addReplyBulkCBuffer(c,v,vlen);
 								//count++;
 								//								}
+
+								printf("sstore iterate 1, encoding of key=%d, klen=%d\n", encoding, klen);
+								
 								//								if (flags & REDIS_HASH_VALUE) {
+
+								if(encoding==REDIS_ENCODING_HT)	{
+									k = obj->ptr;
+									//printf("k=%s\n",obj->ptr);
+								}
+								else	{
+									//printf("k=%s\n",k);
+								}
+
+
 								encoding = hashTypeCurrent(hi,REDIS_HASH_VALUE,&obj,&v,&vlen);
-								printf("k=%s\n",k);
-								vcopy = (char*)malloc(vlen+1);
-								strncpy(vcopy, v, vlen);
-								printf("v=%s\n",v);
+
+								if(encoding==REDIS_ENCODING_HT)	{
+									v = obj->ptr;
+									//printf("v=%s\n",obj->ptr);
+								}
+								else	{
+									//printf("v=%s\n",v);
+								}
+
+
+								
+								//vcopy = (char*)malloc(vlen+1);
+								//strncpy(vcopy, v, vlen);
+								
 								//	if (encoding == REDIS_ENCODING_HT)
 								//					addReplyBulk(c,obj);
 								//	else
 								//					addReplyBulkCBuffer(c,v,vlen);
 								//count++;
 								//								}
-								bson_append_string( b, k, vcopy);
+								//printf("sstore iterate 2, encoding of value=%d, vlen=%d\n", encoding, vlen);
+
+
+								//printf("sstore iterate end, k=%s, v=%s\n", k, v);
+								
+								int bapresult = bson_append_string( b, k, v);
+								if(bapresult!=BSON_OK)	{
+											printf("bapresult=%d\n", bapresult);
+									}
+
 				}
+
+				hashTypeReleaseIterator(hi);
+
 
 				printf("sstore 3\n");
 				//3. delete
